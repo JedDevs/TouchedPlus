@@ -1,7 +1,6 @@
 # TouchedPlus
 Raycast Based Collision Detection For Primitive Objects
 
-
 **Accurate** Collision Detection for BaseParts, compatible with all primitive objects but made for cuboids. <br>
 **Example:** Adds Touched & Touch Ended for one BasePart.
 
@@ -18,3 +17,5 @@ partDetection.TouchEnded:Connect(function(lastObj)
 	print("touch ended on: ", lastObj.Name)
 end)
 ```
+
+**Reason:** Robloxs Built in Touched & TouchEnded events are sensitive and near unusuable. I haven't since found a good, fast and performant alternative to this. Even Zone+ has limitations as it uses Region3 which is much more, costly, than raycasting. I also wanted to offer much more control to the developer to decide the balance on ***accuracy, speed and performance***.
