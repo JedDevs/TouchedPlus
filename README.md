@@ -1,8 +1,8 @@
 # TouchedPlus
 Raycast Based Collision Detection For Primitive Objects
 
-**Accurate** Collision Detection for BaseParts, compatible with all primitive objects but made for cuboids.
 
+**Accurate** Collision Detection for BaseParts, compatible with all primitive objects but made for cuboids. <br>
 **Example:** Adds Touched & Touch Ended for one BasePart.
 
 ```lua
