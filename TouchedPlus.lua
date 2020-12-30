@@ -1,3 +1,11 @@
+--[[
+
+	Name: TouchedPlus
+	By: JedDevs
+	Date: 30/12/2020 (DD/MM/YYYY)
+
+--]]
+
 local TouchedPlus = {}
 TouchedPlus.__index = TouchedPlus
 
@@ -23,10 +31,11 @@ function TouchedPlus:VectorSetup(pos, size)
 	self.IncY = round(inc.Y, 1)
 end
 
-function TouchedPlus.new(object, precision, delay)
+function TouchedPlus.new(object, precision, dynamic, delay)
 	if not object or not precision then return warn("Missing Parameter") end
 	if precision <= 0 or precision > 100 then return warn("precision must be 1-100") end
 	if not object:IsA("BasePart") then return warn("Currently Only Supports Primative Objects") end
+	if type(dynamic) ~= "boolean" and dynamic ~= nil then return warn("Dynamic must be a boolean") end
 	
 	local self = setmetatable({
 		_maid = Maid.new(),
@@ -37,8 +46,10 @@ function TouchedPlus.new(object, precision, delay)
 		Touched = Signal.new(),
 		TouchEnded = Signal.new(),
 		
-		lastTouched = false,
-		touched = false
+		updatePosition = dynamic or true,
+		
+		lastTouched = {},
+		touching = {},
 	}, TouchedPlus)
 	
 	self.raycastParams = RaycastParams.new()
@@ -47,6 +58,7 @@ function TouchedPlus.new(object, precision, delay)
 	
 	local delay = delay or (((precision - 1) * 0.09) / 99) + 0.01 --balance out precision with performance
 	self._maid:GiveTask(Thread.DelayRepeat(delay, self.Update, self))
+	self:VectorSetup(self.object.Position, self.object.Size)
 	
 	return self
 end
@@ -54,13 +66,28 @@ end
 function TouchedPlus:RaycastDown(origin, distance)
 	local raycastResult = workspace:Raycast(origin, distance, self.raycastParams)
 	if not raycastResult then return end
-	self.touched = raycastResult.Instance
+	
+	
+	if not self.lastTouched[raycastResult.Instance] then
+		self.lastTouched[raycastResult.Instance] = raycastResult.Instance
+		self.Touched:Fire(raycastResult.Instance)
+	end
+	
+	self.touching[raycastResult.Instance] = raycastResult.Instance
+end
+
+
+function TouchedPlus:CheckResults(obj)
+	if self.touching[obj] then return end
+	self.TouchEnded:Fire(obj)
+	
+	self.lastTouched[obj] = nil
 end
 
 function TouchedPlus:Update()
-	self:VectorSetup(self.object.Position, self.object.Size)
+	if self.updatePosition then self:VectorSetup(self.object.Position, self.object.Size) end
 	local startPos = Vector2.new(self.TopPos.X - (self.TopSize.X / 2), self.TopPos.Z - (self.TopSize.Y / 2) )
-	self.touched = false
+	self.touching = {}
 	
 	for x = 0, self.TopSize.X, self.IncX do --x
 		for y = 0, self.TopSize.Y, self.IncY do --y
@@ -73,12 +100,8 @@ function TouchedPlus:Update()
 		end
 	end
 	
-	if self.touched and not self.lastTouched then --newTouch
-		self.lastTouched = self.touched
-		self.Touched:Fire(self.touched)
-	elseif not self.touched and self.lastTouched then --noTouch
-		self.TouchEnded:Fire(self.lastTouched)
-		self.lastTouched = false
+	for _,obj  in next, self.lastTouched do
+		self:CheckResults(obj)
 	end
 end
 
