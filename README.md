@@ -7,7 +7,7 @@ Raycast Based Collision Detection For Primitive Objects
 ```lua
 local TouchedPlus = require(game:GetService("ReplicatedStorage").TouchedPlus)
 local partDetection = TouchedPlus.new(script.Parent, 10) 
---object, precision, optional [delay] (otherwise automatically determined based on precision to balance performance)
+--object, optional [precision] (integer), optional [dynamic] (boolean),optional [delay] (otherwise automatically determined based on precision to balance performance)
 
 partDetection.Touched:Connect(function(obj)
 	print("touched: ", obj.Name)
