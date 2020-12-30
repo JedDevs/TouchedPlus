@@ -15,6 +15,9 @@ local Signal = require(script.Signal)
 local Thread = require(script.Thread)
 local Maid = require(script.Maid)
 
+local UPPER_VOLUME_LIMIT = 800000
+local PRECISION_LIMIT = 100
+
 local function round(number, precision)
 	local fmtStr = string.format('%%0.%sf',precision)
 	number = string.format(fmtStr,number)
@@ -32,16 +35,25 @@ function TouchedPlus:VectorSetup(pos, size)
 end
 
 function TouchedPlus.new(object, precision, dynamic, delay)
-	if not object or not precision then return warn("Missing Parameter") end
-	if precision <= 0 or precision > 100 then return warn("precision must be 1-100") end
+	if not object then return warn("Missing Parameter") end
 	if not object:IsA("BasePart") then return warn("Currently Only Supports Primative Objects") end
 	if type(dynamic) ~= "boolean" and dynamic ~= nil then return warn("Dynamic must be a boolean") end
+	if precision and (precision <= 0 or precision > PRECISION_LIMIT) then return warn("precision must be 1-"..tostring(UPPER_VOLUME_LIMIT)) end
+	
+	local volume = object.Size.X * object.Size.Y * object.Size.Z
+	local autoSect = (((volume - 1) * (100 - 1)) / (UPPER_VOLUME_LIMIT - 1)) + 1
+	
+	if volume >= UPPER_VOLUME_LIMIT then 
+		autoSect = PRECISION_LIMIT
+	end
+	
+	print(autoSect)
 	
 	local self = setmetatable({
 		_maid = Maid.new(),
 		
 		object = object,
-		sects = precision,
+		sects = autoSect or precision,
 		
 		Touched = Signal.new(),
 		TouchEnded = Signal.new(),
@@ -56,7 +68,7 @@ function TouchedPlus.new(object, precision, dynamic, delay)
 	self.raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 	self.raycastParams.FilterDescendantsInstances = {object}
 	
-	local delay = delay or (((precision - 1) * 0.09) / 99) + 0.01 --balance out precision with performance
+	local delay = delay or (((self.sects - 1) * 0.09) / 99) + 0.01 --balance out precision with performance
 	self._maid:GiveTask(Thread.DelayRepeat(delay, self.Update, self))
 	self:VectorSetup(self.object.Position, self.object.Size)
 	
