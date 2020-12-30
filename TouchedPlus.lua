@@ -47,8 +47,6 @@ function TouchedPlus.new(object, precision, dynamic, delay)
 		autoSect = PRECISION_LIMIT
 	end
 	
-	print(autoSect)
-	
 	local self = setmetatable({
 		_maid = Maid.new(),
 		
