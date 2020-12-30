@@ -53,7 +53,7 @@ function TouchedPlus.new(object, precision, dynamic, delay)
 		_maid = Maid.new(),
 		
 		object = object,
-		sects = autoSect or precision,
+		sects = precision or autoSect,
 		
 		Touched = Signal.new(),
 		TouchEnded = Signal.new(),
