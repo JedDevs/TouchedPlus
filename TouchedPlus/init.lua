@@ -89,7 +89,7 @@ end
 
 function TouchedPlus:CheckResults(obj)
 	if self.touching[obj] then return end
-	self.TouchEnded:Fire(obj)
+	self.TouchEnded:Fire(obj, obj.CFrame)
 	
 	self.lastTouched[obj] = nil
 end
